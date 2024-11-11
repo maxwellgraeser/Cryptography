@@ -92,6 +92,61 @@ string fixedXOR(string input, string input2)
     return output;
 }
 
+// Converts a hex string to a plain text string (assuming ASCII characters)
+string hexToAscii(const string& hex) {
+    string ascii;
+    for (size_t i = 0; i < hex.length(); i += 2) {
+        int byte = stoi(hex.substr(i, 2), nullptr, 16);
+        ascii += static_cast<char>(byte);
+    }
+    return ascii;
+}
+
+// Scoring function for English text based on frequency of common characters
+int scoreText(const string& text) {
+    string commonChars = "etaoin shrdlu";
+    int score = 0;
+    for (char c : text) {
+        if (isalpha(c) || c == ' ') {
+            score += commonChars.find(tolower(c)) != string::npos ? 1 : 0;
+        }
+    }
+    return score;
+}
+
+
+void singleByteXorDecoder(const string& hexInput) 
+{
+    string asciiInput = hexToAscii(hexInput);
+    
+    int bestScore = 0;
+    string bestDecryption;
+    char bestKey;
+
+    // Try all possible single-byte keys (0-255)
+    for (int key = 0; key < 256; ++key) {
+        string decryptedText;
+
+        // XOR each character in the ASCII string with the key
+        for (char c : asciiInput) {
+            decryptedText += c ^ key;
+        }
+
+        // Score the result based on letter frequency
+        int score = scoreText(decryptedText);
+
+        // Update best score and decryption if this one is better
+        if (score > bestScore) {
+            bestScore = score;
+            bestDecryption = decryptedText;
+            bestKey = static_cast<char>(key);
+        }
+    }
+
+    // Output best result
+    cout << "Best Key: " << bestKey << "\nScore: " << bestScore << "\nDecryption: " << bestDecryption << endl;
+}
+
 // Void function to test each problems example input and compare it to the output.
 void problems()
 {
@@ -105,6 +160,9 @@ void problems()
     string problemOneInput2 = "686974207468652062756c6c277320657965";
     string problemTwoOutput = fixedXOR(problemTwoInput1, problemOneInput2);
     (problemTwoOutput == "746865206b696420646f6e277420706c6179") ? cout << "Passed Problem 2.\n" : cout << "Failed Problem 2.\n";
+
+    // 3
+    singleByteXorDecoder("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
 }
 
 int main()
